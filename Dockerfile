@@ -1,7 +1,7 @@
 # parameters
 ARG REPO_NAME="hercules185"
 ARG DESCRIPTION="185 Group Project"
-ARG MAINTAINER=""
+ARG MAINTAINER="Hercules club"
 # pick an icon from: https://fontawesome.com/v4.7.0/icons/
 ARG ICON="cube"
 
