@@ -7,7 +7,7 @@ ARG ICON="cube"
 
 # ==================================================>
 # ==> Do not change the code below this line
-ARG ARCH=amd64
+ARG ARCH
 ARG DISTRO=daffy
 ARG DOCKER_REGISTRY=docker.io
 ARG BASE_IMAGE=dt-ros-commons
