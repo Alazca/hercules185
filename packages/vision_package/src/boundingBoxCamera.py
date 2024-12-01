@@ -7,7 +7,7 @@ import cv2
 
 class BoundingBoxWithCameraFeed:
     def __init__(self):
-        rospy.init_node('bounding_box_with_camera_node', anonymous=True)
+        rospy.init_node('boundingBoxCamera_node', anonymous=True)
 
         self.image_pub = rospy.Publisher('/camera_with_bounding_boxes', Image, queue_size=10)
 
