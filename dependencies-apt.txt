@@ -1,1 +1,7 @@
 # LIST YOUR APT PACKAGES HERE
+ros-noetic-cv-bridge
+ros-noetic-sensor-msgs
+ros-noetic-std-msgs
+libopencv-dev
+python3-opencv
+
