@@ -9,7 +9,7 @@ import numpy as np
 import torch
 
 class YOLOv5DetectorCompressed(DTROS):
-    def __init__(self, nodeName):  # Fixed double underscore syntax
+    def __init__(self, nodeName):  
         super(yolov5_detector_compressed, self).__init__(node_name=nodeName, node_type=NodeType.GENERIC)
         self.model = None
 
@@ -85,8 +85,8 @@ class YOLOv5DetectorCompressed(DTROS):
 
 if __name__ == '__main__':
     try:
-        detector = YOLOv5DetectorCompressed()
-        if detector.model is not None:  # Only spin if initialization succeeded
+        detector = YOLOv5DetectorCompressed(nodeName='yolov5_detector_compressed')
+        if detector.model is not None:  
             rospy.spin()
     except rospy.ROSInterruptException:
         pass
