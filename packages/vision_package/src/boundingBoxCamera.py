@@ -6,10 +6,9 @@ import cv2
 import numpy as np
 import torch
 
-class YOLOv5DetectorCompressed:
-    def __init__(self):  # Fixed double underscore syntax
-        rospy.init_node('yolov5_detector_compressed', anonymous=True)
-        
+class YOLOv5DetectorCompressed(DTROS):
+    def __init__(self, nodeName):  # Fixed double underscore syntax
+        super(yolov5_detector_compressed, self).__init__(node_name=nodeName, node_type=NodeType.GENERIC)
         self.model = None
 
         # Subscribe to the Duckiebot's compressed image topic
@@ -27,6 +26,17 @@ class YOLOv5DetectorCompressed:
         except Exception as e:
             rospy.logerr(f"Failed to load YOLOv5 model: {e}")
             self.model = None  # Fail gracefully
+            self.loadModel()
+
+    def loadModel(self):
+        try:
+            rospy.loginfo("Loading YOLOv5 model...")
+            self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+            self.model.eval()  # Put the model in evaluation mode for inference
+            rospy.loginfo("YOLOv5 model loaded successfully.")
+        except Exception as e:
+            rospy.logerr(f"Failed to load YOLOv5 model: {e}")
+            self.model = None
 
     def image_callback(self, msg):
         if not self.model:
