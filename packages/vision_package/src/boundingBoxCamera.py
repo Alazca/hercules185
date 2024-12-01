@@ -14,8 +14,8 @@ class BoundingBoxWithCameraFeed:
 
         self.bridge = CvBridge()
 
-    def image_callback(self, data):
-        try:
+def image_callback(self, data):
+    try:
         rospy.loginfo("Compressed image received")
         
         # Decode the compressed image to OpenCV format
@@ -30,10 +30,11 @@ class BoundingBoxWithCameraFeed:
         image_msg = self.bridge.cv2_to_imgmsg(cv_image_with_boxes, encoding="bgr8")
         self.image_pub.publish(image_msg)
         rospy.loginfo("Published image with bounding boxes to /camera_with_bounding_boxes")
-    
-        except CvBridgeError as e:
-            rospy.logerr(f"CvBridge Error: {e}")
-   
+    except CvBridgeError as e:
+        rospy.logerr(f"CvBridge Error: {e}")
+    except Exception as e:
+        rospy.logerr(f"Unexpected error: {e}")
+
         except Exception as e:
         rospy.logerr(f"Unexpected error: {e}")    def draw_bounding_boxes(self, image):
         detections = [
