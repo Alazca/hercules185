@@ -10,8 +10,7 @@ class BoundingBoxWithCameraFeed:
         rospy.init_node('boundingBoxCamera_node', anonymous=True)
 
         self.image_pub = rospy.Publisher('/camera_with_bounding_boxes', Image, queue_size=10)
-
-        self.image_sub = rospy.Subscriber('/duckiebot/camera_node/image/raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', Image, self.image_callback)
 
         self.bridge = CvBridge()
 
