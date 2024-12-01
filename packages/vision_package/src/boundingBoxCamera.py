@@ -21,7 +21,7 @@ class YOLOv5DetectorCompressed:
         # Load YOLOv5 model
         try:
             rospy.loginfo("Loading YOLOv5 model...")
-            self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='/code/assets/yolov5s.pt', force_reload=True)
+            self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='/home/alazca/Development/projects/hercules185/assets/yolov5s.pt', force_reload=True)
             rospy.loginfo("YOLOv5 model loaded successfully.")
         except Exception as e:
             rospy.logerr(f"Failed to load YOLOv5 model: {e}")
