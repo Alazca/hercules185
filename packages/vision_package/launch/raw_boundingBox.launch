@@ -1,4 +1,0 @@
-
-<launch>
-    <node name="raw_boundingBox_camera_node" pkg="vision_package" type="raw_boundingBox.py" output="screen" />
-</launch>
