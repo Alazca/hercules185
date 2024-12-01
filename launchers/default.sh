@@ -14,7 +14,7 @@ dt-launchfile-init
 
 # launching app
 dt-exec echo "This is an empty launch script. Update it to launch your application."
-
+dt-exec roslaunch vision_package boundingBoxCamera.launch
 
 # ----------------------------------------------------------------------------
 # YOUR CODE ABOVE THIS LINE

@@ -6,7 +6,7 @@ source /environment.sh
 dt-launchfile-init
 
 # launch publisher
-rosrun boundingBoxCamera boundingBoxCamera.py
+dt-exec rosrun vision_package boundingBoxCamera.py
 
 # wait for app to end
 dt-launchfile-join
