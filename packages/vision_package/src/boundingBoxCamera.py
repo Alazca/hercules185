@@ -1,49 +1,57 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import os
 import rospy
-from sensor_msgs.msg import CompressedImage
-from geometry_msgs.msg import Point
-from std_msgs.msg import String
-from duckietown.dtros import DTROS, NodeType
 import cv2
 import numpy as np
 import torch
+from sensor_msgs.msg import CompressedImage
+from geometry_msgs.msg import Point
+from duckietown.dtros import DTROS, NodeType
 
-class YOLOv5DetectorCompressed(DTROS):
-    def __init__(self, nodeName):  
-        super(YOLOv5DetectorCompressed, self).__init__(node_name=nodeName, node_type=NodeType.GENERIC)
-        self.model = None
 
-        # Subscribe to the Duckiebot's compressed image topic
-        self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', CompressedImage, self.image_callback)
-       
-        # Publisher for detected person's coordinates
-        self.person_pub = rospy.Publisher('/hercules/person_coordinates', Point, queue_size=10)
-       
+class ObjectDetectionNode(DTROS):
+
+    def __init__(self, node_name):
+        # Initialize the DTROS parent class
+        super(ObjectDetectionNode, self).__init__(node_name=node_name, node_type=NodeType.GENERIC)
+        # Static parameters
+        self._vehicle_name = os.environ['VEHICLE_NAME']
+        # Subscribe to compressed image topic
+        self._image_subscriber = rospy.Subscriber(
+            f'/{self._vehicle_name}/camera_node/image/compressed',
+            CompressedImage,
+            self.image_callback,
+            queue_size=1,
+            buff_size=2**24
+        )
+        # Publisher for detected object coordinates
+        self._coordinates_publisher = rospy.Publisher(
+            f'/{self._vehicle_name}/object_coordinates',
+            Point,
+            queue_size=10
+        )
         # Load YOLOv5 model
-        try:
-            rospy.loginfo("Loading YOLOv5 model...")
-            self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")  # Default YOLOv5s model
-            self.model.eval()  # Added model evaluation mode
-            rospy.loginfo("YOLOv5 model loaded successfully.")
-        except Exception as e:
-            rospy.logerr(f"Failed to load YOLOv5 model: {e}")
-            self.model = None  # Fail gracefully
-            self.loadModel()
+        self.model = self.load_yolo_model()
 
-    def loadModel(self):
+    def load_yolo_model(self):
+        """Load the YOLOv5 model."""
         try:
             rospy.loginfo("Loading YOLOv5 model...")
-            self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")
-            self.model.eval()  # Put the model in evaluation mode for inference
+            model = torch.hub.load('ultralytics/yolov5', 'yolov5s')  # Load YOLOv5s model
+            model.eval()  # Set to evaluation mode
             rospy.loginfo("YOLOv5 model loaded successfully.")
+            return model
         except Exception as e:
-            rospy.logerr(f"Failed to load YOLOv5 model: {e}")
-            self.model = None
+            rospy.logerr(f"Error loading YOLOv5 model: {e}")
+            return None
 
     def image_callback(self, msg):
+        """Callback function to process compressed images."""
         if not self.model:
             rospy.logerr("YOLOv5 model is not initialized. Skipping inference.")
             return
+
         try:
             # Decode compressed image
             np_arr = np.frombuffer(msg.data, np.uint8)
@@ -53,40 +61,33 @@ class YOLOv5DetectorCompressed(DTROS):
                 return
 
             # Convert BGR to RGB for YOLOv5
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Added color space conversion
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Perform inference
-            with torch.no_grad():  # Added for efficiency
+            with torch.no_grad():  # Disable gradient calculation for inference
                 results = self.model(frame_rgb)
 
-            # Extract and process detections
+            # Process detections
             detections = results.xyxy[0].cpu().numpy()  # Bounding boxes
-            person_coordinates = None
-            
             for det in detections:
                 x1, y1, x2, y2, conf, cls = det
                 label = self.model.names[int(cls)]
-                if label == 'person' and conf > 0.5:
+                if conf > 0.5:  # Confidence threshold
+                    rospy.loginfo(f"Detected {label} with confidence {conf:.2f}")
+                    # Calculate the center of the bounding box
                     center_x = int((x1 + x2) / 2)
                     center_y = int((y1 + y2) / 2)
-                    person_coordinates = Point(center_x, center_y, 0)
-                    rospy.loginfo(f"Person detected at: x={center_x}, y={center_y}")
-                    break
-
-            # Publish person's coordinates
-            if person_coordinates:
-                self.person_pub.publish(person_coordinates)
-                rospy.loginfo("Person coordinates published.")
-            else:
-                rospy.loginfo("No person detected.")
+                    # Publish coordinates as a Point message
+                    point = Point(x=center_x, y=center_y, z=0)
+                    self._coordinates_publisher.publish(point)
 
         except Exception as e:
             rospy.logerr(f"Error processing image: {e}")
 
+
 if __name__ == '__main__':
-    try:
-        detector = YOLOv5DetectorCompressed(nodeName='yolov5_detector_compressed')
-        if detector.model is not None:  
-            rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    # Create the node
+    node = ObjectDetectionNode(node_name='object_detection_node')
+    # Keep the node running
+    rospy.spin()
+
