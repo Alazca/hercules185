@@ -14,7 +14,7 @@ catkin_package()
 
 # Specify the Python nodes to be installed
 catkin_install_python(PROGRAMS
-  src/boundingBoxCamera.py
+  #src/boundingBoxCamera.py
   src/raw_boundingBox.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
