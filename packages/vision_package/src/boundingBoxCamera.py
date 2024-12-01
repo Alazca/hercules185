@@ -26,7 +26,7 @@ class YOLOv5DetectorCompressed:
         except Exception as e:
             rospy.logerr(f"Failed to load YOLOv5 model: {e}")
             self.model = None  # Fail gracefully    
-:
+
     def image_callback(self, msg):
         try:
             # Decode compressed image
