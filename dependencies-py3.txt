@@ -5,3 +5,6 @@ numpy
 cv-bridge
 matplotlib
 scipy
+torch
+torchvision
+--extra-index-url https://download.pytorch.org/whl/cu118
