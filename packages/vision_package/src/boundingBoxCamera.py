@@ -10,7 +10,7 @@ import torch
 
 class YOLOv5DetectorCompressed(DTROS):
     def __init__(self, nodeName):  
-        super(yolov5_detector_compressed, self).__init__(node_name=nodeName, node_type=NodeType.GENERIC)
+        super(YOLOv5DetectorCompressed, self).__init__(node_name=nodeName, node_type=NodeType.GENERIC)
         self.model = None
 
         # Subscribe to the Duckiebot's compressed image topic
