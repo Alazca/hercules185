@@ -16,7 +16,7 @@ class YOLOv5DetectorCompressed:
         self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', CompressedImage, self.image_callback)
        
         # Publisher for detected person's coordinates
-        self.person_pub = rospy.Publisher('/person_coordinates', Point, queue_size=10)
+        self.person_pub = rospy.Publisher('/hercules/person_coordinates', Point, queue_size=10)
        
         # Load YOLOv5 model
         try:
