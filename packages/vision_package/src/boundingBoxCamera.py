@@ -2,6 +2,8 @@
 import rospy
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import Point
+from std_msgs.msg import String
+from duckietown.dtros import DTROS, NodeType
 import cv2
 import numpy as np
 import torch
