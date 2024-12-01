@@ -15,7 +15,7 @@ dt-launchfile-init
 # launching app
 dt-exec echo "Starting Packages - - -"
 
-#dt-exec roslaunch vision_package boundingBoxCamera.launch
+dt-exec roslaunch vision_package boundingBoxCamera.launch
 
 # ----------------------------------------------------------------------------
 # YOUR CODE ABOVE THIS LINE
