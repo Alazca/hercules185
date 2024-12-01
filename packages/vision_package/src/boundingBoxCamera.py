@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import rospy
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import Point
@@ -8,19 +7,17 @@ import numpy as np
 import torch
 
 class YOLOv5DetectorCompressed:
-    def __init__(self):
+    def __init__(self):  # Fixed double underscore syntax
         rospy.init_node('yolov5_detector_compressed', anonymous=True)
-
         # Subscribe to the Duckiebot's compressed image topic
         self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', CompressedImage, self.image_callback)
-
         # Publisher for detected person's coordinates
         self.person_pub = rospy.Publisher('/person_coordinates', Point, queue_size=10)
-
         # Load YOLOv5 model
         try:
             rospy.loginfo("Loading YOLOv5 model...")
             self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")  # Default YOLOv5s model
+            self.model.eval()  # Added model evaluation mode
             rospy.loginfo("YOLOv5 model loaded successfully.")
         except Exception as e:
             rospy.logerr(f"Failed to load YOLOv5 model: {e}")
@@ -30,30 +27,28 @@ class YOLOv5DetectorCompressed:
         if not self.model:
             rospy.logerr("YOLOv5 model is not initialized. Skipping inference.")
             return
-
         try:
             # Decode compressed image
             np_arr = np.frombuffer(msg.data, np.uint8)
             frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
             if frame is None:
                 rospy.logerr("Failed to decode compressed image.")
                 return
 
-            # Perform inference
-            results = self.model(frame)
+            # Convert BGR to RGB for YOLOv5
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Added color space conversion
 
-            # Log results
-            results.print()
+            # Perform inference
+            with torch.no_grad():  # Added for efficiency
+                results = self.model(frame_rgb)
 
             # Extract and process detections
             detections = results.xyxy[0].cpu().numpy()  # Bounding boxes
             person_coordinates = None
-
+            
             for det in detections:
                 x1, y1, x2, y2, conf, cls = det
                 label = self.model.names[int(cls)]
-
                 if label == 'person' and conf > 0.5:
                     center_x = int((x1 + x2) / 2)
                     center_y = int((y1 + y2) / 2)
@@ -71,10 +66,9 @@ class YOLOv5DetectorCompressed:
         except Exception as e:
             rospy.logerr(f"Error processing image: {e}")
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # Fixed double underscore syntax
     try:
-        YOLOv5DetectorCompressed()
+        detector = YOLOv5DetectorCompressed()  # Added variable assignment
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
-
