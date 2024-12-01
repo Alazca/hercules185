@@ -9,10 +9,15 @@ import torch
 class YOLOv5DetectorCompressed:
     def __init__(self):  # Fixed double underscore syntax
         rospy.init_node('yolov5_detector_compressed', anonymous=True)
+        
+        self.model = None
+
         # Subscribe to the Duckiebot's compressed image topic
         self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', CompressedImage, self.image_callback)
+       
         # Publisher for detected person's coordinates
         self.person_pub = rospy.Publisher('/person_coordinates', Point, queue_size=10)
+       
         # Load YOLOv5 model
         try:
             rospy.loginfo("Loading YOLOv5 model...")
@@ -66,9 +71,10 @@ class YOLOv5DetectorCompressed:
         except Exception as e:
             rospy.logerr(f"Error processing image: {e}")
 
-if __name__ == '__main__':  # Fixed double underscore syntax
+if __name__ == '__main__':
     try:
-        detector = YOLOv5DetectorCompressed()  # Added variable assignment
-        rospy.spin()
+        detector = YOLOv5DetectorCompressed()
+        if detector.model is not None:  # Only spin if initialization succeeded
+            rospy.spin()
     except rospy.ROSInterruptException:
         pass
