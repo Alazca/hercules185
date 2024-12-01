@@ -89,7 +89,7 @@ class YOLOv5DetectorCompressed:
         self.bridge = CvBridge()
 
         # Load YOLOv5 model
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='/path/to/assets/yolov5s.pt')
+        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='~/hercules185/assets/yolov5s.pt')
 
     def image_callback(self, msg):
         try:
