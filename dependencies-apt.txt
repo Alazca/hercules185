@@ -4,4 +4,10 @@ ros-noetic-sensor-msgs
 ros-noetic-std-msgs
 libopencv-dev
 python3-opencv
-
+python3-pip
+python3-numpy
+python3-matplotlib
+python3-scipy
+libopencv-dev
+libboost-all-dev
+libeigen3-dev
