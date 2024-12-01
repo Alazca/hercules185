@@ -11,10 +11,8 @@ class BoundingBoxWithCameraFeed:
     def __init__(self):
         rospy.init_node('boundingBoxCamera_node', anonymous=True)
 
-        # Subscriber for compressed camera feed
         self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', CompressedImage, self.image_callback)
 
-        # Publisher for processed image with bounding boxes
         self.image_pub = rospy.Publisher('/camera_with_bounding_boxes', Image, queue_size=10)
 
         self.bridge = CvBridge()
@@ -35,8 +33,10 @@ class BoundingBoxWithCameraFeed:
             image_msg = self.bridge.cv2_to_imgmsg(cv_image_with_boxes, encoding="bgr8")
             self.image_pub.publish(image_msg)
             rospy.loginfo("Published image with bounding boxes to /camera_with_bounding_boxes")
+        
         except CvBridgeError as e:
             rospy.logerr(f"CvBridge Error: {e}")
+        
         except Exception as e:
             rospy.logerr(f"Unexpected error: {e}")
 
