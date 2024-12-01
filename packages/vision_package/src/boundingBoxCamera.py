@@ -11,17 +11,22 @@ import torch
 class YOLOv5DetectorCompressed:
     def __init__(self):
         rospy.init_node('yolov5_detector_compressed', anonymous=True)
-        
-        # Subscribe to compressed image topic
+
+        # Subscribe to the Duckiebot's compressed image topic
         self.image_sub = rospy.Subscriber('/hercules/camera_node/image/compressed', CompressedImage, self.image_callback)
+
+        # Publisher for person coordinates
         self.person_pub = rospy.Publisher('/person_coordinates', Point, queue_size=10)
 
-        # Initialize CVBridge
-        self.bridge = CvBridge()
-
         # Load YOLOv5 model
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='/home/alazca/Development/projects/hercules185/assets/yolov5s.pt')
-
+        try:
+            rospy.loginfo("Loading YOLOv5 model...")
+            self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='/code/assets/yolov5s.pt', force_reload=True)
+            rospy.loginfo("YOLOv5 model loaded successfully.")
+        except Exception as e:
+            rospy.logerr(f"Failed to load YOLOv5 model: {e}")
+            self.model = None  # Fail gracefully    
+:
     def image_callback(self, msg):
         try:
             # Decode compressed image
