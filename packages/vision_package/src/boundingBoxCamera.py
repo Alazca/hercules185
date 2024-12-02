@@ -100,7 +100,7 @@ class ObjectDetectionNode(DTROS):
                     if conf > 0.5:  # Confidence threshold
                         # Get class
                         cls = int(box.cls)
-                        label = self.moodel.names[cls]
+                        label = self.model.names[cls]
                         
                         # Get coordinates
                         x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
