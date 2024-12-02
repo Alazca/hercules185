@@ -41,9 +41,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     wget && \
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-ubuntu2004.pin -O /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-repo-ubuntu2004-10-2-local_10.2.89-1_arm64.deb && \
-    dpkg -i cuda-repo-ubuntu2004-10-2-local_10.2.89-1_arm64.deb && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/7fa2af80.pub -O /usr/share/keyrings/cuda-archive-keyring.gpg && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb && \
+    dpkg -i cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb && \
+    cp /var/cuda-repo-ubuntu2004-11-8/7fa2af80.pub /usr/share/keyrings/cuda-archive-keyring.gpg && \
     apt-get update
 
 # Install CUDA 10.2
