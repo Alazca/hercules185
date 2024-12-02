@@ -1,0 +1,3 @@
+<launch>
+    <node name="person_follower" pkg="motion_package" type="personFollower.py" output="screen" />
+</launch>
