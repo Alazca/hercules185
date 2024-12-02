@@ -13,8 +13,7 @@ class PersonFollowerNode(DTROS):
             node_name=node_name, node_type=NodeType.GENERIC
         )
 
-        vehicle_name = os.environ["VEHICLE_NAME"]
-        movement_topic = f"/{vehicle_name}/car_cmd_switch_node/cmd"
+        movement_topic = "hercules/car_cmd_switch_node/cmd"
         coordinates_topic = "hercules/object_coordinates"
 
         # Publisher
