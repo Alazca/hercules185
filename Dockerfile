@@ -47,6 +47,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PATH="/usr/local/cuda/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
+# nvidia-container-runtime
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES all
+
+# VERSIONING CONFIGURATION
+ENV CUDA_VERSION 10.2.89
+ENV CUDA_PKG_VERSION 10-2=$CUDA_VERSION-1
+ENV NCCL_VERSION 2.8.4
+ENV CUDNN_VERSION 8.1.1.33
+
+ENV PYTORCH_VERSION 1.7.0
+ENV TORCHVISION_VERSION 0.8.1
+
+#ENV TENSORRT_VERSION 7.1.3.4
+
+ENV PYCUDA_VERSION 2021.1
+
 # define/create repository path
 ARG REPO_PATH="${CATKIN_WS_DIR}/src/${REPO_NAME}"
 ARG LAUNCH_PATH="${LAUNCH_DIR}/${REPO_NAME}"
