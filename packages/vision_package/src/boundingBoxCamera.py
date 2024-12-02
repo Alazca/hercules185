@@ -19,12 +19,9 @@ class ObjectDetectionNode(DTROS):
         
         self.model = None
 
-        # Static parameters
-        self._vehicle_name = os.environ['VEHICLE_NAME']
-        
         # Subscribe to compressed image topic
         self._image_subscriber = rospy.Subscriber(
-            f'/{self._vehicle_name}/camera_node/image/compressed',
+            'hercules/camera_node/image/compressed',
             CompressedImage,
             self.image_callback,
             queue_size=1,
@@ -33,11 +30,17 @@ class ObjectDetectionNode(DTROS):
         
         # Publisher for detected object coordinates
         self._coordinates_publisher = rospy.Publisher(
-            f'/{self._vehicle_name}/object_coordinates',
+            'hercules/object_coordinates',
             Point,
             queue_size=10
         )
         
+        self.debug_publisher = rospy.Publisher(
+            '/hercules/detection_visual/compressed',
+            CompressedImage,
+            queue_size = 1
+        ) 
+
         # Load YOLOv5 model
         self.model = self.load_yolo_model()
 
@@ -53,6 +56,17 @@ class ObjectDetectionNode(DTROS):
             rospy.logerr(f"Error loading YOLOv5 model: {e}")
             self.model = None
 
+    def publish_image(self, frame):
+        try:
+            msg = CompressedImage()
+            msg.header.stamp = rospy.Time.now()
+            msg.format  = "jpeg"
+            msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tobytes()
+            self._debug_publisher.publish(msg)
+
+        except Exception as e:
+            rospy.logerr(f"Error Publishing image: {e}")
+            
     def image_callback(self, msg):
         """Callback function to process compressed images and visualize detections."""
         if self.model is None:
