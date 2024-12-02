@@ -35,13 +35,21 @@ ARG TARGETVARIANT
 # check build arguments
 RUN dt-build-env-check "${REPO_NAME}" "${MAINTAINER}" "${DESCRIPTION}"
 
-# Install CUDA for Jetson (L4T)
+# Install CUDA 10.2
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3-pip \
-    python3-dev \
-    libopenblas-base \
-    libopenmpi-dev \
-    && rm -rf /var/lib/apt/lists/*
+    cuda-cudart-$CUDA_PKG_VERSION \
+    cuda-compat-10-2 \
+    cuda-libraries-$CUDA_PKG_VERSION \
+    cuda-npp-$CUDA_PKG_VERSION \
+    cuda-nvtx-$CUDA_PKG_VERSION \
+    libcublas10=10.2.2.89-1 \
+    libnccl2=$NCCL_VERSION-1+cuda10.2 \
+    libcudnn8=$CUDNN_VERSION-1+cuda10.2 && \
+    apt-mark hold \
+        libnccl2 \
+        libcudnn8 \
+        cuda-compat-10-2 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set CUDA environment variables for Jetson
 ENV PATH="/usr/local/cuda/bin:${PATH}"
