@@ -35,51 +35,6 @@ ARG TARGETVARIANT
 # check build arguments
 RUN dt-build-env-check "${REPO_NAME}" "${MAINTAINER}" "${DESCRIPTION}"
 
-# Copy the CUDA repository .deb file into the container
-COPY cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb /tmp/
-
-# Install prerequisites and CUDA
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg2 \
-    ca-certificates \
-    wget && \
-    # Install the CUDA repository .deb file
-    dpkg --install /tmp/cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb && \
-    # Remove old NVIDIA keys if they exist
-    apt-key del 7fa2af80 || true && \
-    # Download and install the updated NVIDIA keyring
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-keyring_1.1-1_all.deb -O /tmp/cuda-keyring_1.1-1_all.deb && \
-    dpkg -i /tmp/cuda-keyring_1.1-1_all.deb && \
-    # Add the contrib repository
-    add-apt-repository contrib && \
-    # Update the package list and install CUDA
-    apt-get update && apt-get -y install cuda && \
-    # Clean up
-    rm -rf /var/lib/apt/lists/* /tmp/*
-
-
-# Set CUDA environment variables for Jetson
-ENV PATH="/usr/local/cuda/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
-
-# nvidia-container-runtime
-# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES all
-
-# VERSIONING CONFIGURATION
-ENV CUDA_VERSION 10.2.89
-ENV CUDA_PKG_VERSION 10-2=$CUDA_VERSION-1
-ENV NCCL_VERSION 2.8.4
-ENV CUDNN_VERSION 8.1.1.33
-
-ENV PYTORCH_VERSION 1.7.0
-ENV TORCHVISION_VERSION 0.8.1
-
-#ENV TENSORRT_VERSION 7.1.3.4
-
-ENV PYCUDA_VERSION 2021.1
-
 # define/create repository path
 ARG REPO_PATH="${CATKIN_WS_DIR}/src/${REPO_NAME}"
 ARG LAUNCH_PATH="${LAUNCH_DIR}/${REPO_NAME}"
