@@ -35,36 +35,28 @@ ARG TARGETVARIANT
 # check build arguments
 RUN dt-build-env-check "${REPO_NAME}" "${MAINTAINER}" "${DESCRIPTION}"
 
-# Add CUDA repository
+# Copy the CUDA repository .deb file into the container
+COPY cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb /tmp/
+
+# Install prerequisites and CUDA
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     ca-certificates \
     wget && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-ubuntu2004.pin -O /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb && \
-    dpkg -i cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb && \
-    cp /var/cuda-repo-ubuntu2004-11-8/7fa2af80.pub /usr/share/keyrings/cuda-archive-keyring.gpg && \
-    apt-get update
+    # Install the CUDA repository .deb file
+    dpkg --install /tmp/cuda-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb && \
+    # Remove old NVIDIA keys if they exist
+    apt-key del 7fa2af80 || true && \
+    # Download and install the updated NVIDIA keyring
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-keyring_1.1-1_all.deb -O /tmp/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i /tmp/cuda-keyring_1.1-1_all.deb && \
+    # Add the contrib repository
+    add-apt-repository contrib && \
+    # Update the package list and install CUDA
+    apt-get update && apt-get -y install cuda && \
+    # Clean up
+    rm -rf /var/lib/apt/lists/* /tmp/*
 
-# Install CUDA 10.2
-ENV CUDA_PKG_VERSION=10-2
-ENV NCCL_VERSION=2.7.8
-ENV CUDNN_VERSION=8.0.0.180
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    cuda-cudart-$CUDA_PKG_VERSION \
-    cuda-compat-10-2 \
-    cuda-libraries-$CUDA_PKG_VERSION \
-    cuda-npp-$CUDA_PKG_VERSION \
-    cuda-nvtx-$CUDA_PKG_VERSION \
-    libcublas10=10.2.2.89-1 \
-    libnccl2=$NCCL_VERSION-1+cuda10.2 \
-    libcudnn8=$CUDNN_VERSION-1+cuda10.2 && \
-    apt-mark hold \
-        libnccl2 \
-        libcudnn8 \
-        cuda-compat-10-2 && \
-    rm -rf /var/lib/apt/lists/*
 
 # Set CUDA environment variables for Jetson
 ENV PATH="/usr/local/cuda/bin:${PATH}"
