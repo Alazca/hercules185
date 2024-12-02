@@ -35,19 +35,15 @@ ARG TARGETVARIANT
 # check build arguments
 RUN dt-build-env-check "${REPO_NAME}" "${MAINTAINER}" "${DESCRIPTION}"
 
-# Add NVIDIA repository and install CUDA
+# Install CUDA for Jetson (L4T)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg2 curl ca-certificates && \
-    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-keyring_1.0-1_all.deb -O && \
-    dpkg -i cuda-keyring_1.0-1_all.deb && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-    cuda-toolkit-11-4 \
-    cuda-runtime-11-4 \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm cuda-keyring_1.0-1_all.deb
+    python3-pip \
+    python3-dev \
+    libopenblas-base \
+    libopenmpi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set CUDA environment variables
+# Set CUDA environment variables for Jetson
 ENV PATH="/usr/local/cuda/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
