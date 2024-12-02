@@ -67,7 +67,7 @@ class ObjectDetectionNode(DTROS):
             msg.header.stamp = rospy.Time.now()
             msg.format  = "jpeg"
             msg.data = np.array(cv2.imencode('.jpg', frame)[1]).tobytes()
-            self._debug_publisher.publish(msg)
+            self.debug_publisher.publish(msg)
 
         except Exception as e:
             rospy.logerr(f"Error Publishing image: {e}")
@@ -100,11 +100,10 @@ class ObjectDetectionNode(DTROS):
                     if conf > 0.5:  # Confidence threshold
                         # Get class
                         cls = int(box.cls)
-                        label = result.names[cls]
+                        label = self.moodel.names[cls]
                         
                         # Get coordinates
-                        xyxy = box.xyxy[0].cpu().numpy()
-                        x1, y1, x2, y2 = map(int, xyxy)
+                        x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
                         
                         # Calculate center
                         center_x = (x1 + x2) / 2
