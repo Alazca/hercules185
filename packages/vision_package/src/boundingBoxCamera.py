@@ -18,14 +18,12 @@ class ObjectDetectionNode(DTROS):
         super(ObjectDetectionNode, self).__init__(node_name=node_name, node_type=NodeType.GENERIC)
         
         self.model = None
-
-        # Subscribe to compressed image topic
-        self._image_subscriber = rospy.Subscriber(
-            'hercules/camera_node/image/compressed',
+        
+        # Publisher for visualization (create publishers before subscriber)
+        self.debug_publisher = rospy.Publisher(
+            '/hercules/detection_visual/compressed',
             CompressedImage,
-            self.image_callback,
-            queue_size=1,
-            buff_size=2**24
+            queue_size=1
         )
         
         # Publisher for detected object coordinates
@@ -35,11 +33,18 @@ class ObjectDetectionNode(DTROS):
             queue_size=10
         )
         
-        self.debug_publisher = rospy.Publisher(
-            '/hercules/detection_visual/compressed',
+        # Load YOLOv5 model before creating subscriber
+        self.model = self.load_yolo_model()
+        
+        # Subscribe to compressed image topic (create last)
+        self._image_subscriber = rospy.Subscriber(
+            'hercules/camera_node/image/compressed',
             CompressedImage,
-            queue_size = 1
-        ) 
+            self.image_callback,
+            queue_size=1,
+            buff_size=2**24
+        )
+         
 
         # Load YOLOv5 model
         self.model = self.load_yolo_model()
