@@ -60,6 +60,5 @@ class PersonFollowerNode(DTROS):
 
 
 if __name__ == "__main__":
-    rospy.init_node("person_follower_node", anonymous=False)
     node = PersonFollowerNode(node_name="person_follower_node")
     rospy.spin()
