@@ -72,7 +72,7 @@ class ObjectDetectionNode(DTROS):
             # Perform inference
             with torch.no_grad():
                 results = self.model(frame_rgb)
-                detections = results.xyxy[0].cpu().numpy()  # Bounding boxes
+                detections = results[0]
 
             # Process detections and draw bounding boxes
             for det in detections:
