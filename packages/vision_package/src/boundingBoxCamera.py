@@ -15,7 +15,7 @@ class ObjectDetectionNode(DTROS):
         super(ObjectDetectionNode, self).__init__(
             node_name=node_name, node_type=NodeType.GENERIC
         )
-        vehicle_name = os.environ["VEHICLE_NAME"]
+
         # Check CUDA availability and set up device
         cuda_available = torch.cuda.is_available()
         self.device = torch.device("cuda" if cuda_available else "cpu")
