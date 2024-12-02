@@ -73,10 +73,10 @@ class ObjectDetectionNode(DTROS):
             rospy.logerr(f"Error Publishing image: {e}")
             
     def image_callback(self, msg):
-        """Callback function to process compressed images and visualize detections."""
         if self.model is None:
-            rospy.logwarn("YOLOv5 model not initialized yet. Skipping callback.")
+            rospy.logwarn_throttle(1, "YOLOv5 model not initialized yet. Skipping callback.")
             return
+            
         try:
             # Decode compressed image
             np_arr = np.frombuffer(msg.data, np.uint8)
@@ -85,48 +85,52 @@ class ObjectDetectionNode(DTROS):
                 rospy.logerr("Failed to decode compressed image.")
                 return
 
-            # Convert BGR to RGB for YOLOv5
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # Keep a copy of original frame for visualization
+            frame_viz = frame.copy()
 
             # Perform inference
-            with torch.no_grad():
-                results = self.model(frame_rgb)
-                detections = results[0]
-
-            # Process detections and draw bounding boxes
-            for det in detections:
-                x1, y1, x2, y2, conf, cls = det[:6]
-                label = self.model.names[int(cls)]
-                if conf > 0.5:  # Confidence threshold
-                    rospy.loginfo(f"Detected {label} with confidence {conf:.2f}")
+            results = self.model(frame)
+            
+            # Process detections using the correct format
+            for result in results:
+                for box in result.boxes:
+                    # Get confidence
+                    conf = float(box.conf)
                     
-                    # Calculate the center of the bounding box
-                    center_x = int((x1 + x2) / 2)
-                    center_y = int((y1 + y2) / 2)
-                    
-                    # Publish coordinates as a Point message
-                    point = Point(x=center_x, y=center_y, z=0)
-                    self._coordinates_publisher.publish(point)
-
-                    # Draw bounding box
-                    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-                    
-                    # Add label and confidence
-                    cv2.putText(
-                        frame, f"{label} {conf:.2f}",
-                        (int(x1), int(y1) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (0, 255, 0),
-                        2
-                    )
-
-            # Display the frame with bounding boxes
-            cv2.imshow("YOLOv5 Object Detection", frame)
-            cv2.waitKey(1)  # Required to update the display
-
+                    if conf > 0.5:  # Confidence threshold
+                        # Get class
+                        cls = int(box.cls)
+                        label = result.names[cls]
+                        
+                        # Get coordinates
+                        xyxy = box.xyxy[0].cpu().numpy()
+                        x1, y1, x2, y2 = map(int, xyxy)
+                        
+                        # Calculate center
+                        center_x = (x1 + x2) / 2
+                        center_y = (y1 + y2) / 2
+                        
+                        # Publish coordinates
+                        point = Point(x=center_x, y=center_y, z=conf)
+                        self._coordinates_publisher.publish(point)
+                        
+                        # Draw on visualization frame
+                        cv2.rectangle(frame_viz, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        cv2.putText(frame_viz, 
+                                  f"{label} {conf:.2f}", 
+                                  (x1, y1 - 10), 
+                                  cv2.FONT_HERSHEY_SIMPLEX, 
+                                  0.5, 
+                                  (0, 255, 0), 
+                                  2)
+            
+            # Publish the visualization
+            self.publish_image(frame_viz)
+            
         except Exception as e:
             rospy.logerr(f"Error processing image: {e}")
-
+            import traceback
+            rospy.logerr(traceback.format_exc())
 
 if __name__ == '__main__':
     # Create the node
