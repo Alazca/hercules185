@@ -8,6 +8,7 @@ import torch
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import Point
 from duckietown.dtros import DTROS, NodeType
+from ultralytics import YOLO
 
 
 class ObjectDetectionNode(DTROS):
@@ -44,7 +45,7 @@ class ObjectDetectionNode(DTROS):
         """Load the YOLOv5 model."""
         try:
             rospy.loginfo("Loading YOLOv5 model...")
-            self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')  # Load YOLOv5s model
+            self.model = YOLO('yolov5s.pt') 
             self.model.eval()  # Set to evaluation mode
             rospy.loginfo("YOLOv5 model loaded successfully.")
             return self.model
