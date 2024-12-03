@@ -1,2 +1,12 @@
 # LIST YOUR PYTHON3 PACKAGES HERE
 # NOTE: only place non-Duckietown libraries here; pin versions only if necessary
+opencv-python
+numpy
+cv-bridge
+matplotlib
+scipy
+pandas
+--find-links https://developer.download.nvidia.com/compute/redist/jp/v46
+torch
+torchvision
+ultralytics

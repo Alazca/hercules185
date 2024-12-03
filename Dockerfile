@@ -68,6 +68,10 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh && \
   catkin build \
     --workspace ${CATKIN_WS_DIR}/
 
+# Add sourcing commands to .bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc && \
+    echo "source ${CATKIN_WS_DIR}/devel/setup.bash" >> ~/.bashrc
+
 # install launcher scripts
 COPY ./launchers/. "${LAUNCH_PATH}/"
 RUN dt-install-launchers "${LAUNCH_PATH}"
